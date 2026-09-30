@@ -9,3 +9,323 @@
     >
 
     <title>Location Finder</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 30px 20px;
+            display: grid;
+            place-items: center;
+            font-family: Arial, sans-serif;
+            color: #f8fafc;
+            background:
+                radial-gradient(
+                    circle at top left,
+                    #164e63,
+                    transparent 40%
+                ),
+                linear-gradient(
+                    135deg,
+                    #07111f,
+                    #0f172a
+                );
+        }
+
+        .container {
+            width: min(850px, 100%);
+            padding: 45px;
+            border: 1px solid
+                rgba(255, 255, 255, 0.12);
+            border-radius: 25px;
+            background:
+                rgba(15, 23, 42, 0.88);
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .label {
+            margin: 0;
+            color: #2dd4bf;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        h1 {
+            margin: 10px 0;
+            font-size: 48px;
+        }
+
+        .description {
+            margin-bottom: 30px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 16px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            outline: none;
+            color: white;
+            background: #0f172a;
+            font-size: 16px;
+        }
+
+        input:focus {
+            border-color: #2dd4bf;
+        }
+
+        button {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            color: #052e2b;
+            background: #2dd4bf;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #5eead4;
+        }
+
+        button:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
+        #pesan {
+            min-height: 24px;
+            color: #fca5a5;
+        }
+
+        .hasil {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+        }
+
+        .hasil h2 {
+            color: #5eead4;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .card {
+            min-height: 100px;
+            padding: 20px;
+            border: 1px solid #334155;
+            border-radius: 15px;
+            background:
+                rgba(255, 255, 255, 0.05);
+        }
+
+        .card span {
+            display: block;
+            margin-bottom: 12px;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card strong {
+            overflow-wrap: anywhere;
+        }
+
+        .tersembunyi {
+            display: none;
+        }
+
+        footer {
+            margin-top: 35px;
+            color: #64748b;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+
+            form {
+                flex-direction: column;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <p class="label">
+                MAPTILER GEOCODING API
+            </p>
+
+            <h1>Location Finder</h1>
+
+            <p class="description">
+                Masukkan nama lokasi untuk mendapatkan
+                informasi wilayah dan koordinat.
+            </p>
+        </header>
+
+        <form id="formPencarian">
+            <input
+                type="text"
+                id="inputLokasi"
+                placeholder="Contoh: Yogyakarta"
+                required
+            >
+
+            <button id="tombolCari" type="submit">
+                Cari Lokasi
+            </button>
+        </form>
+
+        <p id="pesan"></p>
+
+        <section
+            id="hasil"
+            class="hasil tersembunyi"
+        >
+            <h2 id="lokasi">-</h2>
+
+            <div class="grid">
+                <article class="card">
+                    <span>Negara</span>
+                    <strong id="negara">-</strong>
+                </article>
+
+                <article class="card">
+                    <span>Provinsi</span>
+                    <strong id="provinsi">-</strong>
+                </article>
+
+                <article class="card">
+                    <span>Kecamatan</span>
+                    <strong id="kecamatan">-</strong>
+                </article>
+
+                <article class="card">
+                    <span>Longitude</span>
+                    <strong id="longitude">-</strong>
+                </article>
+
+                <article class="card">
+                    <span>Latitude</span>
+                    <strong id="latitude">-</strong>
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const form =
+            document.getElementById("formPencarian");
+
+        const input =
+            document.getElementById("inputLokasi");
+
+        const hasil =
+            document.getElementById("hasil");
+
+        const pesan =
+            document.getElementById("pesan");
+
+        const tombol =
+            document.getElementById("tombolCari");
+
+        form.addEventListener(
+            "submit",
+            async function (event) {
+                event.preventDefault();
+
+                const lokasi = input.value.trim();
+
+                pesan.textContent =
+                    "Sedang mengambil data...";
+
+                hasil.classList.add("tersembunyi");
+                tombol.disabled = true;
+                tombol.textContent = "Mencari...";
+
+                try {
+                    const response = await fetch(
+                        "/api/lokasi?lokasi=" +
+                        encodeURIComponent(lokasi)
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message);
+                    }
+
+                    document.getElementById(
+                        "lokasi"
+                    ).textContent = data.lokasi;
+
+                    document.getElementById(
+                        "negara"
+                    ).textContent = data.negara;
+
+                    document.getElementById(
+                        "provinsi"
+                    ).textContent = data.provinsi;
+
+                    document.getElementById(
+                        "kecamatan"
+                    ).textContent = data.kecamatan;
+
+                    document.getElementById(
+                        "longitude"
+                    ).textContent = data.longitude;
+
+                    document.getElementById(
+                        "latitude"
+                    ).textContent = data.latitude;
+
+                    hasil.classList.remove(
+                        "tersembunyi"
+                    );
+
+                    pesan.textContent = "";
+                } catch (error) {
+                    pesan.textContent = error.message;
+                } finally {
+                    tombol.disabled = false;
+                    tombol.textContent = "Cari Lokasi";
+                }
+            }
+        );
+    </script>
+</body>
+</html>
