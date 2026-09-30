@@ -1,1 +1,1 @@
-![Screenshot hasil pencarian lokasi](images/screenshot.png)
+![Hasil Location Finder](./README.md/screenshot.png)
